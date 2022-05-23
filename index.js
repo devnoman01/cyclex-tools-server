@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectID } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -22,12 +22,34 @@ async function run() {
   await client.connect();
   console.log("DB Connected");
 
-  const partsCollection = client.db("manufacturer_portal").collection("parts");
+  const productCollection = client
+    .db("manufacturer_portal")
+    .collection("products");
 
-  app.get("/parts", async (req, res) => {
-    const parts = await partsCollection.find().toArray();
-    res.send(parts);
+  const orderCollection = client.db("manufacturer_portal").collection("orders");
+
+  app.get("/products", async (req, res) => {
+    const products = await productCollection.find().toArray();
+    console.log(products);
+    res.send(products);
   });
+
+  app.get("/purchase/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: ObjectID(id) };
+    const productInfo = await productCollection.findOne(query);
+    res.send(productInfo);
+  });
+
+  app.post("/order", async (req, res) => {
+    const order = req.body;
+    const result = await orderCollection.insertOne(order);
+    res.send(result);
+  });
+
+  //
+
+  //
 }
 run().catch(console.dir);
 
