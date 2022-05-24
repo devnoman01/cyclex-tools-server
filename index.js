@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectID } = require("mongodb");
+const { query } = require("express");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -32,7 +33,14 @@ async function run() {
     .db("manufacturer_portal")
     .collection("reviews");
 
+  // GET all products
   app.get("/products", async (req, res) => {
+    const products = await productCollection.find().toArray();
+    res.send(products);
+  });
+
+  // GET all products
+  app.get("/allProducts", async (req, res) => {
     const products = await productCollection.find().toArray();
     res.send(products);
   });
@@ -42,6 +50,18 @@ async function run() {
     const query = { _id: ObjectID(id) };
     const productInfo = await productCollection.findOne(query);
     res.send(productInfo);
+  });
+
+  // Get all purchase order with paid status
+  app.get("/paidOrders", async (req, res) => {
+    const paidOrders = await orderCollection.find().toArray();
+    res.send(paidOrders);
+  });
+
+  // Get all purchase order
+  app.get("/order", async (req, res) => {
+    const userOrders = await orderCollection.find().toArray();
+    res.send(userOrders);
   });
 
   // POST new purchase order
