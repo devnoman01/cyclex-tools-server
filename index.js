@@ -39,7 +39,16 @@ async function run() {
 
   //
 
-  // Get single product data - Purchase Page Data Load
+  // Get single user purchase order - My Order
+  app.get("/order", async (req, res) => {
+    const userEmail = req.query.email;
+    const query = { userEmail: userEmail };
+    const userOrders = await orderCollection.find(query).toArray();
+    console.log(userOrders);
+    res.send(userOrders);
+  });
+
+  // Get single product data - Purchase Page Data Load --
   app.get("/purchase/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: ObjectID(id) };
@@ -47,7 +56,7 @@ async function run() {
     res.send(productInfo);
   });
 
-  // GET latest products - Home Page 6 product
+  // GET latest products - Home Page 6 product --
   app.get("/latestProducts", async (req, res) => {
     const products = await (
       await productCollection.find().toArray()
