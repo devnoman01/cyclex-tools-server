@@ -39,12 +39,21 @@ async function run() {
 
   //
 
-  // Get single user purchase order - My Order
+  //
+
+  // delete single product
+  app.delete("/products/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) };
+    const result = productCollection.deleteOne(query);
+    res.send(result);
+  });
+
+  // Get single user purchase order - My Orders --
   app.get("/order", async (req, res) => {
     const userEmail = req.query.email;
     const query = { userEmail: userEmail };
     const userOrders = await orderCollection.find(query).toArray();
-    console.log(userOrders);
     res.send(userOrders);
   });
 
@@ -65,9 +74,10 @@ async function run() {
   });
 
   // Get all purchase order - Manage All Order --
-  app.get("/order", async (req, res) => {
-    const userOrders = await orderCollection.find().toArray();
-    res.send(userOrders);
+  app.get("/allOrders", async (req, res) => {
+    const query = {};
+    const allOrders = await orderCollection.find(query).toArray();
+    res.send(allOrders);
   });
 
   // GET all products - Manage Products --
