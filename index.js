@@ -33,58 +33,58 @@ async function run() {
     .db("manufacturer_portal")
     .collection("reviews");
 
-  // GET all products
-  app.get("/products", async (req, res) => {
-    const products = await productCollection.find().toArray();
-    res.send(products);
-  });
+  //
 
-  // GET all products
-  app.get("/allProducts", async (req, res) => {
-    const products = await productCollection.find().toArray();
-    res.send(products);
-  });
+  //
 
-  app.get("/purchase/:id", async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: ObjectID(id) };
-    const productInfo = await productCollection.findOne(query);
-    res.send(productInfo);
-  });
+  //
 
-  // Get all purchase order with paid status
-  app.get("/paidOrders", async (req, res) => {
-    const paidOrders = await orderCollection.find().toArray();
-    res.send(paidOrders);
-  });
+  // Get single product data - Purchase Page Data Load
+  //   app.get("/purchase/:id", async (req, res) => {
+  //     const id = req.params.id;
+  //     const query = { _id: ObjectID(id) };
+  //     const productInfo = await productCollection.findOne(query);
+  //     res.send(productInfo);
+  //   });
 
-  // Get all purchase order
+  // GET latest products - Home Page 3 product
+  //   app.get("/latestProducts", async (req, res) => {
+  //     const products = await productCollection.find().toArray();
+
+  //     res.send(products);
+  //   });
+
+  // Get all purchase order - Manage All Order
   app.get("/order", async (req, res) => {
     const userOrders = await orderCollection.find().toArray();
     res.send(userOrders);
   });
 
-  // POST new purchase order
+  // GET all products - Manage Products --
+  app.get("/products", async (req, res) => {
+    const products = await productCollection.find().toArray();
+    res.send(products);
+  });
+
+  // POST new purchase order - Purchase/New Order --
   app.post("/order", async (req, res) => {
     const order = req.body;
     const result = await orderCollection.insertOne(order);
     res.send(result);
   });
 
-  // GET new review
+  // GET all review - home review section --
   app.get("/review", async (req, res) => {
     const reviews = await reviewCollection.find().toArray();
     res.send(reviews);
   });
 
-  // POST new review
+  // POST new review - Add a Review --
   app.post("/review", async (req, res) => {
     const review = req.body;
     const result = await reviewCollection.insertOne(review);
     res.send(result);
   });
-
-  //
 
   //
 }
