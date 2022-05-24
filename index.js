@@ -40,12 +40,12 @@ async function run() {
   //
 
   // Get single product data - Purchase Page Data Load
-  //   app.get("/purchase/:id", async (req, res) => {
-  //     const id = req.params.id;
-  //     const query = { _id: ObjectID(id) };
-  //     const productInfo = await productCollection.findOne(query);
-  //     res.send(productInfo);
-  //   });
+  app.get("/purchase/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: ObjectID(id) };
+    const productInfo = await productCollection.findOne(query);
+    res.send(productInfo);
+  });
 
   // GET latest products - Home Page 6 product
   app.get("/latestProducts", async (req, res) => {
