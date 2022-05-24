@@ -47,14 +47,15 @@ async function run() {
   //     res.send(productInfo);
   //   });
 
-  // GET latest products - Home Page 3 product
-  //   app.get("/latestProducts", async (req, res) => {
-  //     const products = await productCollection.find().toArray();
+  // GET latest products - Home Page 6 product
+  app.get("/latestProducts", async (req, res) => {
+    const products = await (
+      await productCollection.find().toArray()
+    ).slice(0, 6);
+    res.send(products);
+  });
 
-  //     res.send(products);
-  //   });
-
-  // Get all purchase order - Manage All Order
+  // Get all purchase order - Manage All Order --
   app.get("/order", async (req, res) => {
     const userOrders = await orderCollection.find().toArray();
     res.send(userOrders);
