@@ -51,11 +51,11 @@ async function run() {
     res.send(result);
   });
 
-  //   // GET new review
-  //   app.get("/review", async (req, res) => {
-  //     const reviews = await reviewCollection.find().toArray();
-  //     res.send(reviews);
-  //   });
+  // GET new review
+  app.get("/review", async (req, res) => {
+    const reviews = await reviewCollection.find().toArray();
+    res.send(reviews);
+  });
 
   // POST new review
   app.post("/review", async (req, res) => {
