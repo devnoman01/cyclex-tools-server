@@ -28,9 +28,12 @@ async function run() {
 
   const orderCollection = client.db("manufacturer_portal").collection("orders");
 
+  const reviewCollection = client
+    .db("manufacturer_portal")
+    .collection("reviews");
+
   app.get("/products", async (req, res) => {
     const products = await productCollection.find().toArray();
-    console.log(products);
     res.send(products);
   });
 
@@ -41,9 +44,23 @@ async function run() {
     res.send(productInfo);
   });
 
+  // POST new purchase order
   app.post("/order", async (req, res) => {
     const order = req.body;
     const result = await orderCollection.insertOne(order);
+    res.send(result);
+  });
+
+  //   // GET new review
+  //   app.get("/review", async (req, res) => {
+  //     const reviews = await reviewCollection.find().toArray();
+  //     res.send(reviews);
+  //   });
+
+  // POST new review
+  app.post("/review", async (req, res) => {
+    const review = req.body;
+    const result = await reviewCollection.insertOne(review);
     res.send(result);
   });
 
