@@ -19,34 +19,71 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+//
+
+// function verifyJWT(req, res, next) {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader) {
+//     return res.status(401).send({ message: "Unauthorized Access" });
+//   }
+//   const token = authHeader.split(" ")[1];
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+//     if (err) {
+//       res.status(403).send({ message: "Forbidden Access" });
+//     }
+//     req.decoded = decoded;
+//     next();
+//   });
+// }
+
+//
+
 async function run() {
   await client.connect();
   console.log("DB Connected");
+
+  const orderCollection = client.db("manufacturer_portal").collection("orders");
 
   const productCollection = client
     .db("manufacturer_portal")
     .collection("products");
 
-  const orderCollection = client.db("manufacturer_portal").collection("orders");
-
   const reviewCollection = client
     .db("manufacturer_portal")
     .collection("reviews");
 
-  //
+  const userCollection = client.db("manufacturer_portal").collection("users");
 
   //
 
   //
 
   //
+
+  //
   //
 
   //
+  // POST new user - getting data from usetoken
+  app.put("/user/:email", async (req, res) => {
+    const email = req.params.email;
+    const user = req.body;
+    const filter = { email: email };
+    const options = { upsert: true };
+    const updatedDoc = {
+      $set: user,
+    };
+
+    const result = await userCollection.updateOne(filter, updatedDoc, options);
+    const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "10h",
+    });
+    res.send({ result, token });
+  });
 
   //
 
-  // delete single order - My Order page & manage orders page
+  // delete single order - My Order page & manage orders page --
   app.delete("/order/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: ObjectId(id) };
@@ -54,7 +91,7 @@ async function run() {
     res.send(result);
   });
 
-  // POST new product - Add a Product
+  // POST new product - Add a Product --
   app.post("/products", async (req, res) => {
     const product = req.body;
     const result = await productCollection.insertOne(product);
