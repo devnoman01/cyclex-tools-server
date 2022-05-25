@@ -40,16 +40,19 @@ async function run() {
   //
 
   //
+  //
 
-  // delete single order - My Order page --
+  //
+
+  //
+
+  // delete single order - My Order page & manage orders page
   app.delete("/order/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: ObjectId(id) };
     const result = orderCollection.deleteOne(query);
     res.send(result);
   });
-
-  //
 
   // POST new product - Add a Product
   app.post("/products", async (req, res) => {
