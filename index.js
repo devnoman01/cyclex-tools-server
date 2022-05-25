@@ -61,6 +61,9 @@ async function run() {
   //
 
   //
+
+  //
+
   //
   // Get single user information - My profile
   app.get("/user", async (req, res) => {
@@ -80,6 +83,18 @@ async function run() {
   });
 
   //
+
+  // update user role as admin --
+  app.put("/user/admin/:email", async (req, res) => {
+    const email = req.params.email;
+    const filter = { email: email };
+    const updatedDoc = {
+      $set: { role: "admin" },
+    };
+    const result = await userCollection.updateOne(filter, updatedDoc);
+    console.log(email, result);
+    res.send(result);
+  });
 
   // POST new user - getting data from usetoken --
   app.put("/user/:email", async (req, res) => {
