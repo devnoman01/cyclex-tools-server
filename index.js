@@ -62,9 +62,26 @@ async function run() {
 
   //
   //
+  // Get single user information - My profile
+  app.get("/user", async (req, res) => {
+    const email = req.query.email;
+    const query = { email: email };
+    const user = await userCollection.find(query).toArray();
+    res.send(user);
+  });
 
   //
-  // POST new user - getting data from usetoken
+
+  //
+  // Get all user information - Make Admin Page
+  app.get("/allUser", async (req, res) => {
+    const users = await userCollection.find().toArray();
+    res.send(users);
+  });
+
+  //
+
+  // POST new user - getting data from usetoken --
   app.put("/user/:email", async (req, res) => {
     const email = req.params.email;
     const user = req.body;
@@ -80,8 +97,6 @@ async function run() {
     });
     res.send({ result, token });
   });
-
-  //
 
   // delete single order - My Order page & manage orders page --
   app.delete("/order/:id", async (req, res) => {
