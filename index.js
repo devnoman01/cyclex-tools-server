@@ -41,7 +41,14 @@ async function run() {
 
   //
 
-  // delete single product - Manage Product page
+  // POST new product - Add a Product
+  app.post("/products", async (req, res) => {
+    const product = req.body;
+    const result = await productCollection.insertOne(product);
+    res.send(result);
+  });
+
+  // delete single product - Manage Product page --
   app.delete("/products/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: ObjectId(id) };
