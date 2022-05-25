@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion, ObjectID } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { query } = require("express");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -41,7 +41,7 @@ async function run() {
 
   //
 
-  // delete single product
+  // delete single product - Manage Product page
   app.delete("/products/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: ObjectId(id) };
@@ -60,7 +60,7 @@ async function run() {
   // Get single product data - Purchase Page Data Load --
   app.get("/purchase/:id", async (req, res) => {
     const id = req.params.id;
-    const query = { _id: ObjectID(id) };
+    const query = { _id: ObjectId(id) };
     const productInfo = await productCollection.findOne(query);
     res.send(productInfo);
   });
