@@ -76,13 +76,14 @@ async function run() {
   //
 
   //
+
+  //
+
   // Get all user information - Make Admin Page
-  app.get("/allUser", async (req, res) => {
+  app.get("/admin", async (req, res) => {
     const users = await userCollection.find().toArray();
     res.send(users);
   });
-
-  //
 
   // update user role as admin --
   app.put("/user/admin/:email", async (req, res) => {
