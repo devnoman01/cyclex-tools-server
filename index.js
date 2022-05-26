@@ -76,19 +76,6 @@ async function run() {
       }
     };
 
-    //
-
-    //
-
-    //
-
-    //
-
-    //
-
-    //
-
-    //
     // // payment processing - send data to stripe
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -105,10 +92,26 @@ async function run() {
       });
     });
 
-    // payment
+    // // payment status update
+    // app.patch("/product/:id", verifyJWT, async (req, res) => {
+    //   const id = req.params.id;
+    //   const payment = req.body;
+    //   const filter = { _id: ObjectId(id) };
+    //   const updatedDoc = {
+    //     $set: {
+    //       isPaid: true,
+    //       transactionId: payment.transactionId,
+    //     },
+    //   };
+    //   const result = await paymentCollection.insertOne(payment);
+    //   const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+    //   res.send(updatedOrder);
+    // });
+
+    // quantity update
     app.patch("/order/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const payment = req.body;
+
       const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
