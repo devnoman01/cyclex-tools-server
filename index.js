@@ -19,8 +19,6 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-//
-
 // function verifyJWT(req, res, next) {
 //   const authHeader = req.headers.authorization;
 //   if (!authHeader) {
@@ -35,6 +33,22 @@ const client = new MongoClient(uri, {
 //     next();
 //   });
 // }
+
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden Access" });
+    }
+    req.decoded = decoded;
+    console.log("verifying JWT");
+    next();
+  });
+}
 
 //
 
@@ -83,6 +97,16 @@ async function run() {
   //
   //
 
+  // // update user information
+  // app.patch("/admin/:email", verifyJWT, async (req, res) => {
+  //   const email = req.query.email;
+  //   const userInfo = req.b
+  //   const user = await userCollection.updateOne({ email: email });
+  //   const isAdmin = user.role === "admin";
+  //   res.send({ admin: isAdmin });
+  // });
+  //
+
   // verifying user as admin
   app.get("/admin/:email", async (req, res) => {
     const email = req.params.email;
@@ -92,7 +116,7 @@ async function run() {
   });
 
   // Get all user information - Make Admin Page --
-  app.get("/admin", async (req, res) => {
+  app.get("/admin", verifyJWT, async (req, res) => {
     const users = await userCollection.find().toArray();
     res.send(users);
   });
@@ -121,7 +145,7 @@ async function run() {
 
     const result = await userCollection.updateOne(filter, updatedDoc, options);
     const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "10h",
+      expiresIn: "7d",
     });
     res.send({ result, token });
   });
@@ -150,11 +174,16 @@ async function run() {
   });
 
   // Get single user purchase order - My Orders --
-  app.get("/order", async (req, res) => {
+  app.get("/order", verifyJWT, async (req, res) => {
     const userEmail = req.query.email;
-    const query = { userEmail: userEmail };
-    const userOrders = await orderCollection.find(query).toArray();
-    res.send(userOrders);
+    const decodedEmail = req.decoded.email;
+    if (userEmail === decodedEmail) {
+      const query = { userEmail: userEmail };
+      const userOrders = await orderCollection.find(query).toArray();
+      return res.send(userOrders);
+    } else {
+      return res.status(403).send({ message: "Forbidden Access" });
+    }
   });
 
   // Get single product data - Purchase Page Data Load --
@@ -180,14 +209,14 @@ async function run() {
   });
 
   // Get all purchase order - Manage All Order --
-  app.get("/allOrders", async (req, res) => {
+  app.get("/allOrders", verifyJWT, async (req, res) => {
     const query = {};
     const allOrders = await orderCollection.find(query).toArray();
     res.send(allOrders);
   });
 
   // GET all products - Manage Products --
-  app.get("/products", async (req, res) => {
+  app.get("/products", verifyJWT, async (req, res) => {
     const products = await productCollection.find().toArray();
     res.send(products);
   });
@@ -206,7 +235,7 @@ async function run() {
   });
 
   // POST new review - Add a Review --
-  app.post("/review", async (req, res) => {
+  app.post("/review", verifyJWT, async (req, res) => {
     const review = req.body;
     const result = await reviewCollection.insertOne(review);
     res.send(result);
