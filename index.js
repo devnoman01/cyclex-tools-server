@@ -82,6 +82,7 @@ async function run() {
 
   //
   //
+
   // verifying user as admin
   app.get("/admin/:email", async (req, res) => {
     const email = req.params.email;
@@ -89,8 +90,6 @@ async function run() {
     const isAdmin = user.role === "admin";
     res.send({ admin: isAdmin });
   });
-
-  //
 
   // Get all user information - Make Admin Page --
   app.get("/admin", async (req, res) => {
