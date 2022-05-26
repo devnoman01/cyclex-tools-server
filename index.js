@@ -19,21 +19,6 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-// function verifyJWT(req, res, next) {
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     return res.status(401).send({ message: "Unauthorized Access" });
-//   }
-//   const token = authHeader.split(" ")[1];
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-//     if (err) {
-//       res.status(403).send({ message: "Forbidden Access" });
-//     }
-//     req.decoded = decoded;
-//     next();
-//   });
-// }
-
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -45,7 +30,6 @@ function verifyJWT(req, res, next) {
       return res.status(403).send({ message: "Forbidden Access" });
     }
     req.decoded = decoded;
-    console.log("verifying JWT");
     next();
   });
 }
@@ -53,226 +37,239 @@ function verifyJWT(req, res, next) {
 //
 
 async function run() {
-  await client.connect();
-  console.log("DB Connected");
+  try {
+    await client.connect();
+    console.log("DB Connected");
 
-  const orderCollection = client.db("manufacturer_portal").collection("orders");
+    const orderCollection = client
+      .db("manufacturer_portal")
+      .collection("orders");
 
-  const productCollection = client
-    .db("manufacturer_portal")
-    .collection("products");
+    const productCollection = client
+      .db("manufacturer_portal")
+      .collection("products");
 
-  const reviewCollection = client
-    .db("manufacturer_portal")
-    .collection("reviews");
+    const reviewCollection = client
+      .db("manufacturer_portal")
+      .collection("reviews");
 
-  const userCollection = client.db("manufacturer_portal").collection("users");
+    const userCollection = client.db("manufacturer_portal").collection("users");
 
-  //
+    //
 
-  //
+    // verify admin user
+    const verifyAdmin = async (req, res, next) => {
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
 
-  //
-
-  //
-
-  //
-
-  //
-
-  //
-
-  //
-
-  //
-  //
-  // POST new user - getting data from usetoken --
-  // app.put("/user/:email", async (req, res) => {
-  //   const email = req.params.email;
-  //   const user = req.body;
-  //   const filter = { email: email };
-  //   const options = { upsert: true };
-  //   const updatedDoc = {
-  //     $set: user,
-  //   };
-  //
-  //   const result = await userCollection.updateOne(filter, updatedDoc, options);
-  //   const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
-  //     expiresIn: "7d",
-  //   });
-  //   res.send({ result, token });
-  // });
-
-  //
-  //
-
-  // update user information - My Profile page --
-  app.patch("/user/:id", verifyJWT, async (req, res) => {
-    const id = req.params.id;
-    console.log(id);
-    const user = req.body;
-    console.log(user);
-    const filter = { _id: ObjectId(id) };
-    const updatedDoc = {
-      $set: {
-        address: user.address,
-        education: user.education,
-        img: user.img,
-        linkedin: user.linkedin,
-        name: user.name,
-        number: user.number,
-      },
-    };
-    const result = await userCollection.updateOne(filter, updatedDoc);
-    console.log(result);
-    res.send(result);
-  });
-
-  // verifying user as admin
-  app.get("/admin/:email", async (req, res) => {
-    const email = req.params.email;
-    const user = await userCollection.findOne({ email: email });
-    const isAdmin = user.role === "admin";
-    res.send({ admin: isAdmin });
-  });
-
-  // Get single user information - My profile
-  app.get("/user", async (req, res) => {
-    const email = req.query.email;
-    const query = { email: email };
-    const user = await userCollection.find(query).toArray();
-    res.send(user);
-  });
-
-  // Get all user information - Make Admin Page --
-  app.get("/admin", verifyJWT, async (req, res) => {
-    const users = await userCollection.find().toArray();
-    res.send(users);
-  });
-
-  // update user role as admin --
-  app.put("/user/admin/:email", async (req, res) => {
-    const email = req.params.email;
-    const filter = { email: email };
-    const updatedDoc = {
-      $set: { role: "admin" },
-    };
-    const result = await userCollection.updateOne(filter, updatedDoc);
-    console.log(email, result);
-    res.send(result);
-  });
-
-  // POST new user - getting data from usetoken --
-  app.put("/user/:email", async (req, res) => {
-    const email = req.params.email;
-    const user = req.body;
-    const filter = { email: email };
-    const options = { upsert: true };
-    const updatedDoc = {
-      $set: user,
+      if (requesterAccount.role === "admin") {
+        next();
+      } else {
+        return res.status(403).send({ message: "forbidden access" });
+      }
     };
 
-    const result = await userCollection.updateOne(filter, updatedDoc, options);
-    const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "7d",
+    //
+
+    //
+
+    //
+
+    //
+
+    //
+
+    //
+
+    //
+    //
+
+    //
+    //
+
+    // update user information - My Profile page --
+    app.patch("/user/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const user = req.body;
+      console.log(user);
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          address: user.address,
+          education: user.education,
+          img: user.img,
+          linkedin: user.linkedin,
+          name: user.name,
+          number: user.number,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
     });
-    res.send({ result, token });
-  });
 
-  // delete single order - My Order page & manage orders page --
-  app.delete("/order/:id", async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: ObjectId(id) };
-    const result = orderCollection.deleteOne(query);
-    res.send(result);
-  });
+    // verifying user as admin - useAdmin hook --
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user.role === "admin";
+      res.send({ admin: isAdmin });
+    });
 
-  // POST new product - Add a Product --
-  app.post("/products", async (req, res) => {
-    const product = req.body;
-    const result = await productCollection.insertOne(product);
-    res.send(result);
-  });
+    // Get single user information - My profile --
+    app.get("/user", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await userCollection.find(query).toArray();
+      res.send(user);
+    });
 
-  // delete single product - Manage Product page --
-  app.delete("/products/:id", async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: ObjectId(id) };
-    const result = productCollection.deleteOne(query);
-    res.send(result);
-  });
+    // Get all user information - Make Admin Page --
+    app.get("/admin", verifyJWT, verifyAdmin, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
 
-  // Get single user purchase order - My Orders --
-  app.get("/order", verifyJWT, async (req, res) => {
-    const userEmail = req.query.email;
-    const decodedEmail = req.decoded.email;
-    if (userEmail === decodedEmail) {
-      const query = { userEmail: userEmail };
-      const userOrders = await orderCollection.find(query).toArray();
-      return res.send(userOrders);
-    } else {
-      return res.status(403).send({ message: "Forbidden Access" });
-    }
-  });
+    // update user role as admin -- make admin page
+    app.put("/user/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updatedDoc = {
+        $set: { role: "admin" },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
 
-  // Get single product data - Purchase Page Data Load --
-  app.get("/purchase/:id", async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: ObjectId(id) };
-    const productInfo = await productCollection.findOne(query);
-    res.send(productInfo);
-  });
+    // POST new user - getting data from usetoken --
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: user,
+      };
 
-  // GET latest products - Home Page 6 product --
-  app.get("/allProducts", async (req, res) => {
-    const products = await productCollection.find().toArray();
-    res.send(products);
-  });
+      const result = await userCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      const token = jwt.sign(
+        { email: email },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
+      res.send({ result, token });
+    });
 
-  // GET latest products - Home Page 6 product by reverse --
-  app.get("/latestProducts", async (req, res) => {
-    const products = await (
-      await (await productCollection.find().toArray()).reverse()
-    ).slice(0, 6);
-    res.send(products);
-  });
+    // delete single order - My Order page & manage orders page --
+    app.delete("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = orderCollection.deleteOne(query);
+      res.send(result);
+    });
 
-  // Get all purchase order - Manage All Order --
-  app.get("/allOrders", verifyJWT, async (req, res) => {
-    const query = {};
-    const allOrders = await orderCollection.find(query).toArray();
-    res.send(allOrders);
-  });
+    // POST new product - Add a Product --
+    app.post("/products", verifyJWT, verifyAdmin, async (req, res) => {
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send(result);
+    });
 
-  // GET all products - Manage Products --
-  app.get("/products", verifyJWT, async (req, res) => {
-    const products = await productCollection.find().toArray();
-    res.send(products);
-  });
+    // delete single product - Manage Product page --
+    app.delete("/products/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = productCollection.deleteOne(query);
+      res.send(result);
+    });
 
-  // POST new purchase order - Purchase/New Order --
-  app.post("/order", async (req, res) => {
-    const order = req.body;
-    const result = await orderCollection.insertOne(order);
-    res.send(result);
-  });
+    // Get single user purchase order - My Orders --
+    app.get("/order", verifyJWT, async (req, res) => {
+      const userEmail = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (userEmail === decodedEmail) {
+        const query = { userEmail: userEmail };
+        const userOrders = await orderCollection.find(query).toArray();
+        return res.send(userOrders);
+      } else {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+    });
 
-  // GET all review - home review section --
-  app.get("/review", async (req, res) => {
-    const reviews = await reviewCollection.find().toArray();
-    res.send(reviews);
-  });
+    // Get single product data - Purchase Page Data Load --
+    app.get("/purchase/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const productInfo = await productCollection.findOne(query);
+      res.send(productInfo);
+    });
 
-  // POST new review - Add a Review --
-  app.post("/review", verifyJWT, async (req, res) => {
-    const review = req.body;
-    const result = await reviewCollection.insertOne(review);
-    res.send(result);
-  });
+    // GET all products - Products page --
+    app.get("/allProducts", async (req, res) => {
+      const products = await productCollection.find().toArray();
+      res.send(products);
+    });
+
+    // GET latest products - Home Page 6 product by reverse --
+    app.get("/latestProducts", async (req, res) => {
+      const products = await (
+        await (await productCollection.find().toArray()).reverse()
+      ).slice(0, 6);
+      res.send(products);
+    });
+
+    // Get all purchase order - Manage All Order --
+    app.get("/allOrders", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = {};
+      const allOrders = await orderCollection.find(query).toArray();
+      res.send(allOrders);
+    });
+
+    // GET all products - Manage Products --
+    app.get("/products", verifyJWT, verifyAdmin, async (req, res) => {
+      const products = await productCollection.find().toArray();
+      res.send(products);
+    });
+
+    // POST new purchase order - Purchase/New Order --
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
+      res.send(result);
+    });
+
+    // GET all review - home review section --
+    app.get("/review", async (req, res) => {
+      const reviews = await reviewCollection.find().toArray();
+      res.send(reviews);
+    });
+
+    // POST new review - Add a Review --
+    app.post("/review", verifyJWT, async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    //
+  } finally {
+    //
+  }
 
   //
 }
+
 run().catch(console.dir);
+
+//
 
 app.get("/", (req, res) => {
   res.send("Manufacturer Portal Server Running");
