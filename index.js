@@ -78,8 +78,21 @@ async function run() {
   //
 
   //
+  //
 
-  // Get all user information - Make Admin Page
+  //
+  //
+  // verifying user as admin
+  app.get("/admin/:email", async (req, res) => {
+    const email = req.params.email;
+    const user = await userCollection.findOne({ email: email });
+    const isAdmin = user.role === "admin";
+    res.send({ admin: isAdmin });
+  });
+
+  //
+
+  // Get all user information - Make Admin Page --
   app.get("/admin", async (req, res) => {
     const users = await userCollection.find().toArray();
     res.send(users);
@@ -154,9 +167,15 @@ async function run() {
   });
 
   // GET latest products - Home Page 6 product --
+  app.get("/allProducts", async (req, res) => {
+    const products = await productCollection.find().toArray();
+    res.send(products);
+  });
+
+  // GET latest products - Home Page 6 product --
   app.get("/latestProducts", async (req, res) => {
     const products = await (
-      await productCollection.find().toArray()
+      await (await productCollection.find().toArray()).reverse()
     ).slice(0, 6);
     res.send(products);
   });
