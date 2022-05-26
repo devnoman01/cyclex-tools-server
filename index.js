@@ -7,6 +7,8 @@ const { query } = require("express");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -54,6 +56,9 @@ async function run() {
       .collection("reviews");
 
     const userCollection = client.db("manufacturer_portal").collection("users");
+    const paymentCollection = client
+      .db("manufacturer_portal")
+      .collection("payments");
 
     //
 
@@ -84,17 +89,68 @@ async function run() {
     //
 
     //
-    //
+    // // payment processing - send data to stripe
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
 
-    //
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    // payment
+    app.patch("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          isPaid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment);
+      const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+      res.send(updatedOrder);
+    });
+
+    // shipment
+    app.patch("/shipOrder/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          isShipped: true,
+        },
+      };
+      const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+      res.send(updatedOrder);
+    });
+
+    //-------------------------------------------
+    // payment processing
+    app.get("/order/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await orderCollection.findOne(query);
+      res.send(order);
+    });
+
     //
 
     // update user information - My Profile page --
     app.patch("/user/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+
       const user = req.body;
-      console.log(user);
+
       const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
