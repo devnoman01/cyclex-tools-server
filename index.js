@@ -172,7 +172,7 @@ async function run() {
     res.send(products);
   });
 
-  // GET latest products - Home Page 6 product --
+  // GET latest products - Home Page 6 product by reverse --
   app.get("/latestProducts", async (req, res) => {
     const products = await (
       await (await productCollection.find().toArray()).reverse()
