@@ -79,13 +79,6 @@ async function run() {
   //
 
   //
-  // Get single user information - My profile
-  app.get("/user", async (req, res) => {
-    const email = req.query.email;
-    const query = { email: email };
-    const user = await userCollection.find(query).toArray();
-    res.send(user);
-  });
 
   //
 
@@ -93,18 +86,47 @@ async function run() {
 
   //
   //
-
+  // POST new user - getting data from usetoken --
+  // app.put("/user/:email", async (req, res) => {
+  //   const email = req.params.email;
+  //   const user = req.body;
+  //   const filter = { email: email };
+  //   const options = { upsert: true };
+  //   const updatedDoc = {
+  //     $set: user,
+  //   };
   //
-  //
-
-  // // update user information
-  // app.patch("/admin/:email", verifyJWT, async (req, res) => {
-  //   const email = req.query.email;
-  //   const userInfo = req.b
-  //   const user = await userCollection.updateOne({ email: email });
-  //   const isAdmin = user.role === "admin";
-  //   res.send({ admin: isAdmin });
+  //   const result = await userCollection.updateOne(filter, updatedDoc, options);
+  //   const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
+  //     expiresIn: "7d",
+  //   });
+  //   res.send({ result, token });
   // });
+
+  //
+  //
+
+  // update user information
+  app.patch("/user/:id", verifyJWT, async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const user = req.body;
+    console.log(user);
+    const filter = { _id: ObjectId(id) };
+    const updatedDoc = {
+      $set: {
+        address: user.address,
+        education: user.education,
+        img: user.img,
+        linkedin: user.linkedin,
+        name: user.name,
+        number: user.number,
+      },
+    };
+    const result = await userCollection.updateOne(filter, updatedDoc);
+    console.log(result);
+    res.send(result);
+  });
   //
 
   // verifying user as admin
@@ -113,6 +135,14 @@ async function run() {
     const user = await userCollection.findOne({ email: email });
     const isAdmin = user.role === "admin";
     res.send({ admin: isAdmin });
+  });
+
+  // Get single user information - My profile
+  app.get("/user", async (req, res) => {
+    const email = req.query.email;
+    const query = { email: email };
+    const user = await userCollection.find(query).toArray();
+    res.send(user);
   });
 
   // Get all user information - Make Admin Page --
