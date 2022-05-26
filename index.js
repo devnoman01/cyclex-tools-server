@@ -106,7 +106,7 @@ async function run() {
   //
   //
 
-  // update user information
+  // update user information - My Profile page --
   app.patch("/user/:id", verifyJWT, async (req, res) => {
     const id = req.params.id;
     console.log(id);
@@ -127,7 +127,6 @@ async function run() {
     console.log(result);
     res.send(result);
   });
-  //
 
   // verifying user as admin
   app.get("/admin/:email", async (req, res) => {
