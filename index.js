@@ -92,26 +92,10 @@ async function run() {
       });
     });
 
-    // // payment status update
-    // app.patch("/product/:id", verifyJWT, async (req, res) => {
-    //   const id = req.params.id;
-    //   const payment = req.body;
-    //   const filter = { _id: ObjectId(id) };
-    //   const updatedDoc = {
-    //     $set: {
-    //       isPaid: true,
-    //       transactionId: payment.transactionId,
-    //     },
-    //   };
-    //   const result = await paymentCollection.insertOne(payment);
-    //   const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
-    //   res.send(updatedOrder);
-    // });
-
-    // quantity update
+    // payment status update
     app.patch("/order/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-
+      const payment = req.body;
       const filter = { _id: ObjectId(id) };
       const updatedDoc = {
         $set: {
@@ -123,6 +107,22 @@ async function run() {
       const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
       res.send(updatedOrder);
     });
+
+    // // quantity update
+    // app.patch("/order/:id", verifyJWT, async (req, res) => {
+    //   const id = req.params.id;
+
+    //   const filter = { _id: ObjectId(id) };
+    //   const updatedDoc = {
+    //     $set: {
+    //       isPaid: true,
+    //       transactionId: payment.transactionId,
+    //     },
+    //   };
+    //   const result = await paymentCollection.insertOne(payment);
+    //   const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+    //   res.send(updatedOrder);
+    // });
 
     // shipment
     app.patch("/shipOrder/:id", verifyJWT, async (req, res) => {
